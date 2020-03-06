@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1">
+    <header>
+        <identifier version="1" id="com.serena.air.plugin.FOD"
+                    name="Fortify On Demand"/>
+        <description>
+            The Fortify On Demand plugin allows you to execute static and dynamic scans in Fortify on Demand as
+            well as import existing scans from the Fortify on-premise tools: Fortify SCA and WebInspect.
+        </description>
+        <tag>Security/Fortify/Fortify On Demand</tag>
+    </header>
+
+    <!-- ==================================== -->
+    <!-- Run Static Scan                      -->
+    <!-- ==================================== -->
+    <step-type name="Run Static Scan">
+        <description>Uploads a Zip file containing source files and dependencies to Fortify On Demand and initiates a static scan.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="bsiToken" required="true">
+                <property-ui type="textAreaBox" label="Build Server Token"
+                             description="The Build Server Integration token created in the User Portal."/>
+            </property>
+            <property name="zipFile" required="true">
+                <property-ui type="textBox" label="Zip Location"
+                             description="The location of a Zip file containing a payload of all the files to upload to FOD and scan."/>
+            </property>
+            <property name="remediationScanPreference">
+                <property-ui type="selectBox" label="Remediation Scan Preference"
+                             default-value="NonRemediationScanOnly"
+                             description="Whether to run a remediation scan or not."/>
+                <value label="Remediation Scan If Available">RemediationScanIfAvailable</value>
+                <value label="Remediation Scan Only">RemediationScanOnly</value>
+                <value label="NonRemediation Scan Only">NonRemediationScanOnly</value>
+            </property>
+            <property name="entitlementPreference">
+                <property-ui type="selectBox" label="Entitlement Preference"
+                             description="Whether to use a single scan or subscription assessment."/>
+                <value label="Single Scan Only">SingleScanOnly</value>
+                <value label="Subscription Only">SubscriptionOnly</value>
+                <value label="Single Scan First Then Subscription">SingleScanFirstThenSubscription</value>
+                <value label="Subscription First Then Single Scan">SubscriptionFirstThenSingleScan</value>
+            </property>
+            <property name="purchaseEntitlement">
+                <property-ui type="checkBox" label="Purchase Entitlement"
+                             description="Whether to purchase an entitlement (if available)."/>
+            </property>
+            <property name="inProgressScanPreferenceType">
+                <property-ui type="selectBox" label="In Progress Scan Preference" default-value="DoNotStartScan"
+                             description="Whether to cancel an in-progress scan and start a new scan or not."/>
+                <value label="Do Not Start Scan">DoNotStartScan</value>
+                <value label="Cancel In ProgressScan">CancelInProgressScan</value>
+            </property>
+            <!-- hidden properties -->
+            <property name="notes">
+                <property-ui type="textAreaBox" label="Notes" hidden="true"
+                             default-value="Submitted from Deployment Automation process ${p:process.name}"
+                             description="Any additional notes about the scan."/>
+            </property>
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="run_static_scan.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Run Dynamic Scan                     -->
+    <!-- ==================================== -->
+    <step-type name="Run Dynamic Scan">
+        <description>Runs a dynamic scan that has previously been configured in Fortify On Demand.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release to run the scan on."/>
+            </property>
+            <property name="entitlementId" required="true">
+                <property-ui type="textBox" label="Entitlement Id"
+                             description="The identifier of the entitlement to use for the scan."/>
+            </property>
+            <property name="assessmentType" required="true">
+                <property-ui type="selectBox" label="Assessment Type"
+                             description="The type of dynamic assessment to use."/>
+                <value label="Dynamic Website Assessment">DynamicWebsiteAssessment</value>
+                <value label="Dynamic+ Website Assessment">DynamicPlusWebsiteAssessment</value>
+                <value label="Dynamic+ Web Services Assessment">DynamicPlusWebServicesAssessment</value>
+            </property>
+            <!-- hidden properties -->
+            <property name="notes">
+                <property-ui type="textAreaBox" label="Notes" hidden="true"
+                             default-value="Submitted from Deployment Automation process ${p:process.name}"
+                             description="Any additional notes about the scan."/>
+            </property>
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="run_dynamic_scan.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Poll Scan                            -->
+    <!-- ==================================== -->
+    <step-type name="Poll Scan">
+        <description>Polls a previously initiated scan for results.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release the Scan was initiated in."/>
+            </property>
+            <property name="scanId" required="true">
+                <property-ui type="textBox" label="Scan Id"
+                             description="The identifier of the scan to poll the results for."/>
+            </property>
+            <property name="pollInterval">
+                <property-ui type="textBox" label="Poll Interval" default-value="5"
+                             description="The interval in minutes between polling for results."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="poll_scan.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Import Static Scan                   -->
+    <!-- ==================================== -->
+    <step-type name="Import Static Scan">
+        <description>Import the results of an on-premise static scan.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release to import the scan to."/>
+            </property>
+            <property name="scanFile" required="true">
+                <property-ui type="textBox" label="Scan File"
+                             description="The location of the scan file (in .FPR format) to import."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="import_static_scan.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Import Dynamic Scan                  -->
+    <!-- ==================================== -->
+    <step-type name="Import Dynamic Scan">
+        <description>Import the results of an on-premise dynamic scan.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release to import the scan to."/>
+            </property>
+            <property name="scanFile" required="true">
+                <property-ui type="textBox" label="Scan File"
+                             description="The location of the scan file (in .FPR format) to import."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="import_dynamic_scan.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Publish Scan Report                  -->
+    <!-- ==================================== -->
+    <step-type name="Publish Scan Report">
+        <description>Retrieve the details of a scan and produce a HTML report with the results.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release containing the scan."/>
+            </property>
+            <property name="scanId" required="true">
+                <property-ui type="textBox" label="Scan Id"
+                             description="The identifier of the scan to publish the results for."/>
+            </property>
+            <property name="resultsFile" required="true">
+                <property-ui type="textBox" label="Results File"
+                             default-value="scanResults.html"
+                             description="The name of the results file to create."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="publish_scan_results.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Publish Release Report               -->
+    <!-- ==================================== -->
+    <step-type name="Publish Release Report">
+        <description>Retrieve the details of a release and produce a HTML report with the results.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release to publish the results for."/>
+            </property>
+            <property name="resultsFile" required="true">
+                <property-ui type="textBox" label="Results File"
+                             default-value="releaseResults.html"
+                             description="The name of the results file to create."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="publish_release_results.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+    <!-- ==================================== -->
+    <!-- Check Release Rating                 -->
+    <!-- ==================================== -->
+    <step-type name="Check Release Rating">
+        <description>Retrieve the security status and rating of a release and optionally fail if a minimum value has not been reached.</description>
+        <properties>
+            <!-- authentication properties -->
+            <property name="fodGrantType">
+                <property-ui type="selectBox" label="Grant Type" default-value="client_credentials"
+                             description="Select whether to use username/password or API client credentials authentication."/>
+                <value label="client_credentials">client_credentials</value>
+                <value label="password">password</value>
+            </property>
+            <property name="fodUsername" required="true">
+                <property-ui type="textBox" label="Username / Client Id" default-value="${p:system/fod.username}"
+                             description="The username or client id used to connect to FOD."/>
+            </property>
+            <property name="fodPassword" required="true">
+                <property-ui type="secureBox" label="Password / Client Secret" default-value="${p:system/fod.password}"
+                             description="The password or client secret used to connect to FOD."/>
+            </property>
+            <property name="fodTenant">
+                <property-ui type="textBox" label="Tenant" default-value="${p:system/fod.tenant}"
+                             description="The name of the FOD tenant (required if username/password authentication is used)."/>
+            </property>
+            <property name="fodApiUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.apiUrl}" label="FOD API URL"
+                             description="The FOD API URL, e.g. https://api.emea.fortify.com."/>
+            </property>
+            <property name="fodPortalUrl" required="true">
+                <property-ui type="textBox" default-value="${p:system/fod.portalUrl}" label="FOD Portal URL"
+                             description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
+            </property>
+            <!-- specific step properties -->
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release to publish the results for."/>
+            </property>
+            <property name="checkRating">
+                <property-ui type="checkBox" label="Check Rating"
+                             description="In addition to overall Pass/Fail status select this option to validate the security rating."/>
+            </property>
+            <property name="minRating" required="true">
+                <property-ui type="textBox" label="Minimum Rating"
+                             default-value="3"
+                             description="The minimum security rating a release needs to be at for the step to succeed."/>
+            </property>
+            <!-- hidden properties -->
+            <property name="fodScope">
+                <property-ui type="textBox" label="API Scope" default-value="api-tenant" hidden="true"
+                             description="Scope of API access to FOD, 'api-tenant' is assumed by default."/>
+            </property>
+            <property name="debugMode">
+                <property-ui type="checkBox" label="Debug Output" hidden="true"
+                             description="Select this option to display debug output during execution."/>
+            </property>
+            <property name="useProxy">
+                <property-ui type="checkBox" label="Use Proxy" hidden="true"
+                             description="Connect to FOD through a proxy server."/>
+            </property>
+            <property name="proxyUrl">
+                <property-ui type="textBox" label="Proxy Server" hidden="true"
+                             description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+        </properties>
+        <post-processing><![CDATA[
+            if (properties.get("exitCode") != 0) {
+                properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+            }
+            else {
+                properties.put("Status", "Success");
+            }
+        ]]>
+        </post-processing>
+        <command program="${GROOVY_HOME}/bin/groovy">
+            <arg value="-cp"/>
+            <arg path="classes:lib/*"/>
+            <arg file="check_security_rating.groovy"/>
+            <arg file="${PLUGIN_INPUT_PROPS}"/>
+            <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+        </command>
+    </step-type>
+
+</plugin>
