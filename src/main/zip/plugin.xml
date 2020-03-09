@@ -44,6 +44,14 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
+            <property name="releaseId" required="true">
+                <property-ui type="textBox" label="Release Id"
+                             description="The identifier of the release the Scan was initiated in."/>
+            </property>
             <property name="bsiToken" required="true">
                 <property-ui type="textAreaBox" label="Build Server Token"
                              description="The Build Server Integration token created in the User Portal."/>
@@ -100,6 +108,22 @@
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
             </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
+            </property>
         </properties>
         <post-processing><![CDATA[
             if (properties.get("exitCode") != 0) {
@@ -153,6 +177,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release to run the scan on."/>
@@ -189,6 +217,22 @@
             <property name="proxyUrl">
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
             </property>
         </properties>
         <post-processing><![CDATA[
@@ -243,6 +287,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release the Scan was initiated in."/>
@@ -271,6 +319,22 @@
             <property name="proxyUrl">
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
             </property>
         </properties>
         <post-processing><![CDATA[
@@ -325,6 +389,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release to import the scan to."/>
@@ -349,6 +417,22 @@
             <property name="proxyUrl">
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
             </property>
         </properties>
         <post-processing><![CDATA[
@@ -403,6 +487,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release to import the scan to."/>
@@ -427,6 +515,22 @@
             <property name="proxyUrl">
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
+            </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
             </property>
         </properties>
         <post-processing><![CDATA[
@@ -481,6 +585,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release containing the scan."/>
@@ -511,6 +619,22 @@
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
             </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
+            </property>
         </properties>
         <post-processing><![CDATA[
             if (properties.get("exitCode") != 0) {
@@ -524,7 +648,7 @@
         <command program="${GROOVY_HOME}/bin/groovy">
             <arg value="-cp"/>
             <arg path="classes:lib/*"/>
-            <arg file="publish_scan_results.groovy"/>
+            <arg file="publish_scan_report.groovy"/>
             <arg file="${PLUGIN_INPUT_PROPS}"/>
             <arg file="${PLUGIN_OUTPUT_PROPS}"/>
         </command>
@@ -564,6 +688,10 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
                              description="The identifier of the release to publish the results for."/>
@@ -603,17 +731,17 @@
         <command program="${GROOVY_HOME}/bin/groovy">
             <arg value="-cp"/>
             <arg path="classes:lib/*"/>
-            <arg file="publish_release_results.groovy"/>
+            <arg file="publish_release_report.groovy"/>
             <arg file="${PLUGIN_INPUT_PROPS}"/>
             <arg file="${PLUGIN_OUTPUT_PROPS}"/>
         </command>
     </step-type>
 
     <!-- ==================================== -->
-    <!-- Check Release Rating                 -->
+    <!-- Check Compliance                     -->
     <!-- ==================================== -->
-    <step-type name="Check Release Rating">
-        <description>Retrieve the security status and rating of a release and optionally fail if a minimum value has not been reached.</description>
+    <step-type name="Check Compliance">
+        <description>Retrieve the security rating of a release and fail if a minimum value has not been reached.</description>
         <properties>
             <!-- authentication properties -->
             <property name="fodGrantType">
@@ -643,17 +771,17 @@
                              description="The FOD User Portal (UI) URL, e.g. https://emea.fortify.com."/>
             </property>
             <!-- specific step properties -->
+            <property name="applicationId" required="true">
+                <property-ui type="textBox" label="Application Id"
+                             description="The identifier of the application to retrieve the release for."/>
+            </property>
             <property name="releaseId" required="true">
                 <property-ui type="textBox" label="Release Id"
-                             description="The identifier of the release to publish the results for."/>
-            </property>
-            <property name="checkRating">
-                <property-ui type="checkBox" label="Check Rating"
-                             description="In addition to overall Pass/Fail status select this option to validate the security rating."/>
+                             description="The identifier of the release to retrieve."/>
             </property>
             <property name="minRating" required="true">
                 <property-ui type="textBox" label="Minimum Rating"
-                             default-value="3"
+                             default-value="5"
                              description="The minimum security rating a release needs to be at for the step to succeed."/>
             </property>
             <!-- hidden properties -->
@@ -673,6 +801,22 @@
                 <property-ui type="textBox" label="Proxy Server" hidden="true"
                              description="The URL of the Proxy Server to connect to, e.g. http://proxy:8080."/>
             </property>
+            <property name="proxyUsername">
+                <property-ui type="textBox" label="Proxy Username" hidden="true"
+                             description="The username used to connect to the proxy."/>
+            </property>
+            <property name="proxyPassword">
+                <property-ui type="secureBox" label="Proxy Password" hidden="true"
+                             description="The password used to connect to the proxy."/>
+            </property>
+            <property name="proxyNtDomain">
+                <property-ui type="textBox" label="Proxy NT Domain" hidden="true"
+                             description="The NT Domain for the proxy."/>
+            </property>
+            <property name="proxyNtWorkstation">
+                <property-ui type="textBox" label="Proxy NT Workstation" hidden="true"
+                             description="The NT Workstation for the proxy."/>
+            </property>
         </properties>
         <post-processing><![CDATA[
             if (properties.get("exitCode") != 0) {
@@ -686,7 +830,7 @@
         <command program="${GROOVY_HOME}/bin/groovy">
             <arg value="-cp"/>
             <arg path="classes:lib/*"/>
-            <arg file="check_security_rating.groovy"/>
+            <arg file="check_compliance.groovy"/>
             <arg file="${PLUGIN_INPUT_PROPS}"/>
             <arg file="${PLUGIN_OUTPUT_PROPS}"/>
         </command>
