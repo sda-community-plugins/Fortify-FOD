@@ -103,19 +103,22 @@ try {
     if (debugMode) { fodApi.setDebugMode(debugMode) }
     fodApi.authenticate(fodTenant, fodUsername, fodPassword, fodGrantType)
 
-    println "Starting dynamic scan" // for application ${applicationId}
     def remediationScan = true
+    def scanType = "remediation scan"
     if (remediationScanPreference != FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly.name()) {
+        scanType = "non remediation scan"
         remediationScan = false
     }
-    if (fodApi.dynamicScanController.startDynamicScan(releaseId, false,
+    println "Starting ${scanType} for application ${applicationId}"
+
+    if (fodApi.dynamicScanController.startDynamicScan(releaseId, remediationScan,
             FodEnums.DynamicAssessmentType.valueOf(assessmentType),
             entitlementId, FodEnums.EntitlementFrequencyType.SingleScan,
             FodEnums.DynamicAssessmentType.valueOf(assessmentType),
             false, true )) {
         scanId = fodApi.getDynamicScanController().getTriggeredScanId()
-        println "Started scan with id: ${scanId}; see:"
-        //println "${fodPortalUrl}/Applications/${applicationId}/Scans"
+        println "For scan status details see the customer portal: \n"
+        println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 
 } catch (StepFailedException e) {

@@ -156,12 +156,6 @@ try {
     bw.write(sb.toString())
     bw.close()
 
-    //long startTime = new Date().getTime();
-    //wieClient.debug("Start UNIX time is: ${startTime}")
-
-    //long finishTime = new Date().getTime();
-    //wieClient.debug("Finish UNIX time is: ${finishTime}")
-
 } catch (StepFailedException e) {
     println "ERROR: ${e.message}"
     System.exit 1

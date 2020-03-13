@@ -5,7 +5,14 @@ as well as import existing scans from the Fortify on-premise tools: Fortify SCA 
 
 This plugin is a work in progress but it is intended to provide the following steps:
 
-* [x] **Step 1** - Description
+* [x] **Run Static Scan** - Uploads a Zip file containing source files and dependencies to Fortify On Demand and initiates a static scan.
+* [x] **Run Dynamic Scan** - Runs a dynamic scan that has previously been configured in Fortify On Demand.
+* [x] **Poll Scan** - Polls a previously initiated scan for results.
+* [x] **Import Static Scan** - Import the results of an on-premise static scan.
+* [x] **Import Dynamic Scan** - Import the results of an on-premise dynamic scan.
+* [x] **Publish Scan Report** - Retrieve the details of a scan and produce a HTML report with the results.
+* [x] **Publish Release Report** - Retrieve the details of a release and produce a HTML report with the results.
+* [x] **Check Compliance** - Retrieve the security rating of a release and fail if a minimum value has not been reached.
 
 
 ### Installing the plugin

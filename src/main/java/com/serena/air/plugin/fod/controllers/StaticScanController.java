@@ -45,17 +45,28 @@ public class StaticScanController extends ScanControllerBase {
 
             parsedbsiToken = parser.convert(bsiToken);
             if (parsedbsiToken == null) {
-                throw new Exception("Bsi Token given is invalid and cannot be parsed");
+                throw new Exception("BSI Token given is invalid and cannot be parsed");
             }
-            remediationScanPreference = (isRemediationScan) ? FodEnums.RemediationScanPreferenceType.RemediationScanOnly
-                    : remediationScanPreference != null ? remediationScanPreference : FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly ;
+
+            FodEnums.RemediationScanPreferenceType rScanPref = FodEnums.RemediationScanPreferenceType.RemediationScanOnly;
+            if (isRemediationScan) {
+                rScanPref = FodEnums.RemediationScanPreferenceType.RemediationScanOnly;
+                if (api.getDebugMode()) api.debug("Will carry out Remediation Scan : " + rScanPref.toString());
+            } else if (remediationScanPreference == null) {
+                rScanPref = FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly;
+                if (api.getDebugMode()) api.debug("Will carry out Non Remediation Scan : " + rScanPref.toString());
+
+            }
+            //remediationScanPreference = (isRemediationScan) ? FodEnums.RemediationScanPreferenceType.RemediationScanOnly
+            //        : remediationScanPreference != null ? remediationScanPreference : FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly;
             HttpUrl.Builder builder = HttpUrl.parse(api.getBaseUrl()).newBuilder()
                     .addPathSegments(String.format("/api/v3/releases/%d/static-scans/start-scan-advanced", parsedbsiToken.getProjectVersionId()))
                     .addQueryParameter("releaseId", Integer.toString(parsedbsiToken.getProjectVersionId()))
                     .addQueryParameter("bsiToken", bsiToken.toString())
+                    .addQueryParameter("technologyStack", parsedbsiToken.getTechnologyType())
                     .addQueryParameter("entitlementPreferenceType", (entitlementPreference != null) ? entitlementPreference.toString() : "3")
                     .addQueryParameter("purchaseEntitlement", Boolean.toString(purchaseEntitlement))
-                    .addQueryParameter("remdiationScanPreferenceType", (remediationScanPreference != null) ? remediationScanPreference.toString() : "2")
+                    .addQueryParameter("remdiationScanPreferenceType", rScanPref.toString())
                     .addQueryParameter("inProgressScanActionType", (inProgressScanPreferenceType != null) ? inProgressScanPreferenceType.toString() : "0")
                     .addQueryParameter("scanTool", FodEnums.fodScanTool)
                     .addQueryParameter("scanToolVersion", FodEnums.fodScanToolVersion)
@@ -63,6 +74,9 @@ public class StaticScanController extends ScanControllerBase {
             if (notes != null && !notes.isEmpty()) {
                 String truncatedNotes = abbreviateString(notes.trim(), MAX_NOTES_LENGTH);
                 builder = builder.addQueryParameter("notes", truncatedNotes);
+            }
+            if (parsedbsiToken.getTechnologyVersion() != null) {
+                builder = builder.addQueryParameter("languageLevel", parsedbsiToken.getTechnologyVersion());
             }
             // TODO: Come back and fix the request to set fragNo and offset query parameters
             String fragUrl = builder.build().toString();
@@ -85,8 +99,14 @@ public class StaticScanController extends ScanControllerBase {
                         .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
                         .post(RequestBody.create(byteArray, sendByteArray))
                         .build();
+                if (api.getDebugMode()) {
+                    api.debug("Request: " + request.url().toString());
+                }
                 // Get the response
                 Response response = api.getClient().newCall(request).execute();
+                if (api.getDebugMode()) {
+                    api.debug(response.toString());
+                }
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                     // Re-authenticate
                     api.authenticate();
@@ -101,11 +121,13 @@ public class StaticScanController extends ScanControllerBase {
                     System.out.println("Upload Status - Bytes sent:" + offset);
                 }
 
-                if (response.code() != 202) {
+                Gson gson = new Gson();
+                if (response.code() != HttpStatus.SC_ACCEPTED) {
                     String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
-
-                    Gson gson = new Gson();
-                    if (response.code() == 200) {
+                    if (api.getDebugMode()) {
+                        api.debug("Response: " + responseJsonStr);
+                    }
+                    if (response.code() == HttpStatus.SC_OK) {
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
                         System.out.println("Scan " + scanStartedResponse.getScanId() +
                                 " uploaded successfully. Total bytes sent: " + offset);

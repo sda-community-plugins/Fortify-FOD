@@ -44,7 +44,7 @@ String fodApiUrl = props.notNull("fodApiUrl")
 String fodPortalUrl = props.notNull("fodPortalUrl")
 Integer applicationId = props.notNullInt("applicationId")
 Integer releaseId = props.notNullInt("releaseId")
-Integer scanId = props.notNull("scanId")
+Integer scanId = props.notNullInt("scanId")
 Integer pollInterval = props.notNullInt("pollInterval")
 String fodScope = props.optional("fodScope", "api-tenant")
 boolean useProxy = props.optionalBoolean("useProxy", false)
@@ -83,7 +83,7 @@ if (useProxy) {
 }
 println "Application Id: ${applicationId}"
 println "Release Id: ${releaseId}"
-println "Scan Id: ${scanFile}"
+println "Scan Id: ${scanId}"
 println "Poll Interval: ${pollInterval} minutes"
 println "Debug mode value: ${debugMode}"
 if (debugMode) { props.setDebugLoggingMode() }

@@ -46,10 +46,10 @@ Integer applicationId = props.notNullInt("applicationId")
 Integer releaseId = props.notNullInt("releaseId")
 String bsiToken = props.notNull("bsiToken")
 String zipFile = props.notNull("zipFile")
-String remediationScanPreference = props.optional("remediationScanPreference")
-String entitlementPreference = props.optional("entitlementPreference")
+Integer remediationScanPreference = props.optionalInt("remediationScanPreference", 2)
+Integer entitlementPreference = props.optionalInt("entitlementPreference", 4)
 boolean purchaseEntitlement = props.optionalBoolean("purchaseEntitlement", false)
-String inProgressScanPreferenceType = props.optional("inProgressScanPreferenceType")
+Integer inProgressScanPreferenceType = props.optionalInt("inProgressScanPreferenceType", 0)
 String notes = props.optional("notes")
 String fodScope = props.optional("fodScope", "api-tenant")
 boolean useProxy = props.optionalBoolean("useProxy", false)
@@ -90,10 +90,10 @@ println "Application Id: ${applicationId}"
 println "Release Id: ${releaseId}"
 println "BSI Token: ${bsiToken}"
 println "Zip File: ${zipFile}"
-println "Remediation Scan Preference: ${remediationScanPreference}"
-println "Entitlement Preference: ${entitlementPreference}"
+println "Remediation Scan Preference: " + FodEnums.RemediationScanPreferenceType.fromInt(remediationScanPreference).name()
+println "Entitlement Preference: " + FodEnums.EntitlementPreferenceType.fromInt(entitlementPreference).name()
 println "Purchase Entitlement: ${purchaseEntitlement}"
-println "In Progress Scan Preference: ${inProgressScanPreferenceType}"
+println "In Progress Scan Preference: " + FodEnums.InProgressScanActionType.fromInt(inProgressScanPreferenceType).name()
 println "Debug mode value: ${debugMode}"
 if (debugMode) { props.setDebugLoggingMode() }
 
@@ -117,18 +117,21 @@ try {
     if (debugMode) { fodApi.setDebugMode(debugMode) }
     fodApi.authenticate(fodTenant, fodUsername, fodPassword, fodGrantType)
 
-    println "Starting static scan for application ${applicationId}"
     def remediationScan = true
-    if (remediationScanPreference != FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly.name()) {
+    def scanType = "remediation scan"
+    if (remediationScanPreference == FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly.value) {
         remediationScan = false
+        scanType = "non remediation scan"
     }
+    println "Starting ${scanType} for application ${applicationId}"
+
     if (fodApi.staticScanController.startStaticScan(bsiToken, zipFile, remediationScan,
-            FodEnums.RemediationScanPreferenceType.valueOf(remediationScanPreference),
-            FodEnums.EntitlementPreferenceType.valueOf(entitlementPreference),
-            purchaseEntitlement, FodEnums.InProgressScanActionType.valueOf(inProgressScanPreferenceType),
+            FodEnums.RemediationScanPreferenceType.fromInt(remediationScanPreference),
+            FodEnums.EntitlementPreferenceType.fromInt(entitlementPreference),
+            purchaseEntitlement, FodEnums.InProgressScanActionType.fromInt(inProgressScanPreferenceType),
             notes)) {
         scanId = fodApi.getStaticScanController().getTriggeredScanId()
-        println "Started scan with id: ${scanId}; see:"
+        println "For scan status details see the customer portal: \n"
         println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 

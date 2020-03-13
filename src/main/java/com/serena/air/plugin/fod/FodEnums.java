@@ -134,11 +134,11 @@ public class FodEnums {
 
         public String toString() {
             switch (this._val) {
-                case 1:
+                case 119:
                     return "DynamicWebsiteAssessment";
-                case 2:
+                case 120:
                     return "DynamicPlusWebsiteAssessment";
-                case 3:
+                case 121:
                 default:
                     return "DynamicPlusWebServicesAssessment";
             }

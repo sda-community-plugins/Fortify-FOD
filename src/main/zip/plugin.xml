@@ -64,17 +64,17 @@
                 <property-ui type="selectBox" label="Remediation Scan Preference"
                              default-value="NonRemediationScanOnly"
                              description="Whether to run a remediation scan or not."/>
-                <value label="Remediation Scan If Available">RemediationScanIfAvailable</value>
-                <value label="Remediation Scan Only">RemediationScanOnly</value>
-                <value label="NonRemediation Scan Only">NonRemediationScanOnly</value>
+                <value label="Remediation Scan If Available">0</value>
+                <value label="Remediation Scan Only">1</value>
+                <value label="Non Remediation Scan Only">2</value>
             </property>
             <property name="entitlementPreference">
                 <property-ui type="selectBox" label="Entitlement Preference"
                              description="Whether to use a single scan or subscription assessment."/>
-                <value label="Single Scan Only">SingleScanOnly</value>
-                <value label="Subscription Only">SubscriptionOnly</value>
-                <value label="Single Scan First Then Subscription">SingleScanFirstThenSubscription</value>
-                <value label="Subscription First Then Single Scan">SubscriptionFirstThenSingleScan</value>
+                <value label="Single Scan Only">1</value>
+                <value label="Subscription Only">2</value>
+                <value label="Single Scan First Then Subscription">3</value>
+                <value label="Subscription First Then Single Scan">4</value>
             </property>
             <property name="purchaseEntitlement">
                 <property-ui type="checkBox" label="Purchase Entitlement"
@@ -83,8 +83,8 @@
             <property name="inProgressScanPreferenceType">
                 <property-ui type="selectBox" label="In Progress Scan Preference" default-value="DoNotStartScan"
                              description="Whether to cancel an in-progress scan and start a new scan or not."/>
-                <value label="Do Not Start Scan">DoNotStartScan</value>
-                <value label="Cancel In ProgressScan">CancelInProgressScan</value>
+                <value label="Do Not Start Scan">0</value>
+                <value label="Cancel In ProgressScan">1</value>
             </property>
             <!-- hidden properties -->
             <property name="notes">
