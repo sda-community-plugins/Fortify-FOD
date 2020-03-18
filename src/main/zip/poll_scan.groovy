@@ -94,6 +94,7 @@ println "----------------------------------------"
 
 Proxy proxy = null
 File f
+boolean passFailPolicy
 
 try {
 
@@ -106,7 +107,7 @@ try {
 
     println "Polling scan id ${scanId} for status"
     PollStatus listener = new PollStatus(fodApi, pollInterval);
-    boolean passFailPolicy = listener.releaseStatus(releaseId, scanId);
+    passFailPolicy = listener.releaseStatus(releaseId, scanId);
     listener.printPassFail(fodApi.getReleaseController().getReleaseById(releaseId), scanId)
 } catch (StepFailedException e) {
     println "ERROR: ${e.message}"
@@ -116,10 +117,14 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"scanId\" output property to \"${scanId}\"")
-println("Setting \"passFailPolicy\" output property to \"${passFailPolicy}\"")
-apTool.setOutputProperty("scanId", scanId)
-apTool.setOutputProperty("passFailPolicy", passFailPolicy)
+if (scanId) {
+    println("Setting \"scanId\" output property to \"${scanId}\"")
+    apTool.setOutputProperty("scanId", scanId)
+}
+if (passFailPolicy) {
+    println("Setting \"passFailPolicy\" output property to \"${passFailPolicy}\"")
+    apTool.setOutputProperty("passFailPolicy", passFailPolicy)
+}
 apTool.storeOutputProperties()
 
 //

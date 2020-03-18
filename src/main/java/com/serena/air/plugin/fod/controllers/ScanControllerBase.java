@@ -43,9 +43,12 @@ class ScanControllerBase extends ControllerBase {
             throw new FileNotFoundException("Scan File \"" + scanFile + "\" does not exist!");
         }
 
-        String scanText = "static scan";
-        String scanUrl = "/api/v3/releases/" + releaseId + "/static-scans/import-scan";
-        if (this.getClass().getSimpleName().equals("DynamicScanController")) {
+        String scanText;
+        String scanUrl;
+        if (scanType.equals(FodEnums.ScanType.Static)) {
+            scanText = "static scan";
+            scanUrl = "/api/v3/releases/" + releaseId + "/static-scans/import-scan";
+        } else {
             scanText = "dynamic scan";
             scanUrl = "/api/v3/releases/" + releaseId + "/dynamic-scans/import-scan";
         }
@@ -64,14 +67,13 @@ class ScanControllerBase extends ControllerBase {
             long fileLength = scanFile.length();
 
             HttpUrl.Builder builder = HttpUrl.parse("https://api.emea.fortify.com").newBuilder()
-                    .addPathSegments(String.format("/api/v3/releases/%s/dynamic-scans/import-scan", releaseId))
+                    .addPathSegments(scanUrl)
                     .addQueryParameter("releaseId", (String.valueOf(releaseId)))
                     .addQueryParameter("fileLength", (String.valueOf(fileLength)))
                     .addQueryParameter("importScanSessionId", sessionId);
             String fragUrl = builder.build().toString();
-            if (api.getDebugMode()) {
-                api.debug("Creating scan import session using: " + fragUrl);
-            }
+            api.debug("Creating scan import session using: " + fragUrl);
+
             FileInputStream fs = new FileInputStream(scanFile);
 
             while ((byteCount = fs.read(readByteArray)) != -1) {
@@ -90,9 +92,8 @@ class ScanControllerBase extends ControllerBase {
                         .url(fragUrl + "&fragNo=" + fragmentNumber + "&offset=" + offset)
                         .put(RequestBody.create(byteArray, sendByteArray))
                         .build();
-                if (api.getDebugMode()) {
-                    api.debug("Importing scan import using: " + request.url());
-                }
+                api.debug("Importing scan import using: " + request.url());
+
                 // Get the response
                 Response response = api.getClient().newCall(request).execute();
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
@@ -145,9 +146,8 @@ class ScanControllerBase extends ControllerBase {
                 .url(api.getBaseUrl() + "/api/v3/releases/" + releaseId + "/import-scan-session-id")
                 .get()
                 .build();
-        if (api.getDebugMode()) {
-            api.debug("Starting import scan session using: " + request.url());
-        }
+        api.debug("Starting import scan session using: " + request.url());
+
         Response response = api.getClient().newCall(request).execute();
         String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
 

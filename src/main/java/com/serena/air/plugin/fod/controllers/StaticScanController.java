@@ -48,15 +48,15 @@ public class StaticScanController extends ScanControllerBase {
                 throw new Exception("BSI Token given is invalid and cannot be parsed");
             }
 
-            FodEnums.RemediationScanPreferenceType rScanPref = FodEnums.RemediationScanPreferenceType.RemediationScanOnly;
+            FodEnums.RemediationScanPreferenceType rScanPref;
             if (isRemediationScan) {
                 rScanPref = FodEnums.RemediationScanPreferenceType.RemediationScanOnly;
-                if (api.getDebugMode()) api.debug("Will carry out Remediation Scan : " + rScanPref.toString());
-            } else if (remediationScanPreference == null) {
+            }  else if (remediationScanPreference == null) {
                 rScanPref = FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly;
-                if (api.getDebugMode()) api.debug("Will carry out Non Remediation Scan : " + rScanPref.toString());
-
+            } else {
+                rScanPref = remediationScanPreference;
             }
+            api.debug("Remediation Scan preference set to: " + rScanPref.name());
             //remediationScanPreference = (isRemediationScan) ? FodEnums.RemediationScanPreferenceType.RemediationScanOnly
             //        : remediationScanPreference != null ? remediationScanPreference : FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly;
             HttpUrl.Builder builder = HttpUrl.parse(api.getBaseUrl()).newBuilder()
@@ -99,14 +99,10 @@ public class StaticScanController extends ScanControllerBase {
                         .url(fragUrl + "&fragNo=" + fragmentNumber++ + "&offset=" + offset)
                         .post(RequestBody.create(byteArray, sendByteArray))
                         .build();
-                if (api.getDebugMode()) {
-                    api.debug("Request: " + request.url().toString());
-                }
+                api.debug("Request: " + request.url().toString());
                 // Get the response
                 Response response = api.getClient().newCall(request).execute();
-                if (api.getDebugMode()) {
-                    api.debug(response.toString());
-                }
+                api.debug(response.toString());
                 if (response.code() == HttpStatus.SC_FORBIDDEN) {  // got logged out during polling so log back in
                     // Re-authenticate
                     api.authenticate();
@@ -124,9 +120,7 @@ public class StaticScanController extends ScanControllerBase {
                 Gson gson = new Gson();
                 if (response.code() != HttpStatus.SC_ACCEPTED) {
                     String responseJsonStr = IOUtils.toString(response.body().byteStream(), "utf-8");
-                    if (api.getDebugMode()) {
-                        api.debug("Response: " + responseJsonStr);
-                    }
+                    api.debug("Response: " + responseJsonStr);
                     if (response.code() == HttpStatus.SC_OK) {
                         scanStartedResponse = gson.fromJson(responseJsonStr, PostStartScanResponse.class);
                         System.out.println("Scan " + scanStartedResponse.getScanId() +

@@ -103,12 +103,12 @@ try {
     if (debugMode) { fodApi.setDebugMode(debugMode) }
     fodApi.authenticate(fodTenant, fodUsername, fodPassword, fodGrantType)
 
-    def remediationScan = true
-    def scanType = "remediation scan"
-    if (remediationScanPreference != FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly.name()) {
-        scanType = "non remediation scan"
-        remediationScan = false
-    }
+    def remediationScan = false
+    def scanType = "non remediation scan"
+    //if (remediationScanPreference != FodEnums.RemediationScanPreferenceType.NonRemediationScanOnly.name()) {
+    //    scanType = "non remediation scan"
+    //    remediationScan = false
+    //}
     println "Starting ${scanType} for application ${applicationId}"
 
     if (fodApi.dynamicScanController.startDynamicScan(releaseId, remediationScan,
@@ -117,7 +117,7 @@ try {
             FodEnums.DynamicAssessmentType.valueOf(assessmentType),
             false, true )) {
         scanId = fodApi.getDynamicScanController().getTriggeredScanId()
-        println "For scan status details see the customer portal: \n"
+        println "For scan status details see the customer portal:"
         println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 
@@ -129,8 +129,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"scanId\" output property to \"${scanId}\"")
-apTool.setOutputProperty("scanId", scanId)
+if (scanId) {
+    println("Setting \"scanId\" output property to \"${scanId}\"")
+    apTool.setOutputProperty("scanId", scanId)
+}
 apTool.storeOutputProperties()
 
 //

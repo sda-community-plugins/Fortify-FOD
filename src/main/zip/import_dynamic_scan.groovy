@@ -109,7 +109,8 @@ try {
     println "Importing dynamic scan for release: ${releaseId}"
     if (fodApi.getDynamicScanController().importScanResults(FodEnums.ScanType.Dynamic, releaseId, f)) {
         referenceId = fodApi.getDynamicScanController().getImportReferenceId()
-        println "Import with reference Id: ${referenceId} is in progress; see:"
+        println "Imported with reference Id: ${referenceId}."
+        println "For scan import status details see the customer portal:"
         println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 
@@ -121,8 +122,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"referenceId\" output property to \"${referenceId}\"")
-apTool.setOutputProperty("referenceId", referenceId)
+if (referenceId) {
+    println("Setting \"referenceId\" output property to \"${referenceId}\"")
+    apTool.setOutputProperty("referenceId", referenceId)
+}
 apTool.storeOutputProperties()
 
 //

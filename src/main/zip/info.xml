@@ -133,8 +133,9 @@
 
         <release-note plugin-version="1">
 
-            The Fortify On Demand (FOD) plugin allows you to execute FOD static and dynamic scans as
-            well as upload existing scans form the Fortify on-premise tools.
+            The Fortify On Demand (FOD) plugin allows you to execute static and dynamic scans in Fortify on Demand,
+            import on-premise scans from Fortify SCA and Fortify WebInspect, and report on the status of scans and
+            releases.
 
         </release-note>
 

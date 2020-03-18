@@ -118,8 +118,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"rating\" output property to \"${rating}\"")
-apTool.setOutputProperty("rating", rating)
+if (rating) {
+    println("Setting \"rating\" output property to \"${rating}\"")
+    apTool.setOutputProperty("rating", rating)
+}
 apTool.storeOutputProperties()
 
 //

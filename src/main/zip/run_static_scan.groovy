@@ -131,7 +131,7 @@ try {
             purchaseEntitlement, FodEnums.InProgressScanActionType.fromInt(inProgressScanPreferenceType),
             notes)) {
         scanId = fodApi.getStaticScanController().getTriggeredScanId()
-        println "For scan status details see the customer portal: \n"
+        println "For scan status details see the customer portal:"
         println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 
@@ -143,8 +143,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"scanId\" output property to \"${scanId}\"")
-apTool.setOutputProperty("scanId", scanId)
+if (scanId) {
+    println("Setting \"scanId\" output property to \"${scanId}\"")
+    apTool.setOutputProperty("scanId", scanId)
+}
 apTool.storeOutputProperties()
 
 //

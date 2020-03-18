@@ -109,7 +109,8 @@ try {
     println "Importing static scan for release: ${releaseId}"
     if (fodApi.getStaticScanController().importScanResults(FodEnums.ScanType.Static, releaseId, f)) {
         referenceId = fodApi.getStaticScanController().getImportReferenceId()
-        println "Import with reference Id: ${referenceId} is in progress; see:"
+        println "Imported with reference Id: ${referenceId}."
+        println "For scan import status details see the customer portal:"
         println "${fodPortalUrl}/Applications/${applicationId}/Scans"
     }
 
@@ -121,8 +122,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"referenceId\" output property to \"${referenceId}\"")
-apTool.setOutputProperty("referenceId", referenceId)
+if (referenceId) {
+    println("Setting \"referenceId\" output property to \"${referenceId}\"")
+    apTool.setOutputProperty("referenceId", referenceId)
+}
 apTool.storeOutputProperties()
 
 //

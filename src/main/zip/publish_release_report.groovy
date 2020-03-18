@@ -164,8 +164,10 @@ try {
 println "----------------------------------------"
 println "-- STEP OUTPUTS"
 println "----------------------------------------"
-println("Setting \"resultsFile\" output property to \"${resultsFile}\"")
-apTool.setOutputProperty("resultsFile", resultsFile)
+if (resultsFile) {
+    println("Setting \"resultsFile\" output property to \"${resultsFile}\"")
+    apTool.setOutputProperty("resultsFile", resultsFile)
+}
 apTool.storeOutputProperties()
 
 //

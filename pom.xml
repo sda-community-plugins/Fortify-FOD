@@ -13,7 +13,11 @@
     <artifactId>Fortify-FOD</artifactId>
     <packaging>pom</packaging>
     <name>Fortify-FOD</name>
-    <description>A plugin for integrating with Micro Focus Fortify On Demand (FOD)</description>
+    <description>
+        The Fortify On Demand (FOD) plugin allows you to execute static and dynamic scans in Fortify on Demand,
+        import on-premise scans from Fortify SCA and Fortify WebInspect, and report on the status of scans and
+        releases.
+    </description>
     <version>1.0</version>
 
     <properties>
@@ -42,7 +46,7 @@
 
     <dependencies>
         <!-- If you set scope to "runtime" the dependencies will be copied into your plugins's zip file. -->
-        <dependency>
+        <!--dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
             <version>4.4.5</version>
@@ -56,7 +60,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>4.4</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>

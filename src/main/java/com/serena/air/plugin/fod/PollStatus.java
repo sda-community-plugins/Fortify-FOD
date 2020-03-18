@@ -36,7 +36,7 @@ public class PollStatus {
         boolean policyPass = true;
         try
         {
-            while(!finished)
+            while (!finished)
             {
                 // Get the status of the release
                 ReleaseDTO release = fodApi.getReleaseController().getReleaseFields(releaseId,
@@ -52,21 +52,20 @@ public class PollStatus {
                 if(analysisStatusTypes == null)
                     analysisStatusTypes = Arrays.asList(fodApi.getLookupController().getLookupItems(FodEnums.APILookupItemTypes.AnalysisStatusTypes));
 
-                if(failCount < MAX_FAILS)
-                {
+                if (failCount < MAX_FAILS) {
                     String statusString = "";
 
                     // Create a list of values that will be used to break the loop if found
                     // This way if any of this changes we don't need to redo the keys or something
                     List<String> complete = new ArrayList<>();
                     for (LookupItemsModel statusType : analysisStatusTypes) {
-                        if (statusType.getText() == "Completed")    complete.add(statusType.getValue());
-                        if (statusType.getText() == "Canceled")     complete.add(statusType.getValue());
-                        if (statusType.getText() == "Waiting")      complete.add(statusType.getValue());
+                        if (statusType.getText().equalsIgnoreCase("Completed"))    complete.add(statusType.getValue());
+                        if (statusType.getText().equalsIgnoreCase("Canceled"))     complete.add(statusType.getValue());
+                        if (statusType.getText().equalsIgnoreCase("Waiting"))     complete.add(statusType.getValue());
                     }
 
                     // Look for and print the status OR break the loop.
-                    for(LookupItemsModel o: analysisStatusTypes) {
+                    for (LookupItemsModel o: analysisStatusTypes) {
                         if(o != null) {
                             int analysisStatus = Integer.parseInt(o.getValue());
                             if (analysisStatus == status) {
@@ -87,7 +86,7 @@ public class PollStatus {
                             System.out.println("Unable to retrieve scan summary data");
                         } else {
                             System.out.println(message);
-                            int pauseDetailsLength = scanSummary.getPauseDetails().length > 0 ? scanSummary.getPauseDetails().length : 0;
+                            int pauseDetailsLength = Math.max(scanSummary.getPauseDetails().length, 0);
                             System.out.println(String.format(reason, statusString.equals("Canceled") ? scanSummary.getCancelReason()
                                     :  ((pauseDetailsLength > 0 ) ? (scanSummary.getPauseDetails()[pauseDetailsLength-1].getReason() == null) ?"" : scanSummary.getPauseDetails()[pauseDetailsLength-1].getReason(): "")));
                             System.out.println(String.format(reasonNotes, statusString.equals("Canceled") ? scanSummary.getAnalysisStatusReasonNotes()

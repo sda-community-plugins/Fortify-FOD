@@ -1,7 +1,8 @@
 # Micro Focus Fortify On Demand (FOD) plugin
 
-The _Micro Focus Fortify On Demand_ plugin plugin allows you to execute static and dynamic scans in Fortify on Demand 
-as well as import existing scans from the Fortify on-premise tools: Fortify SCA and WebInspect. 
+The _Micro Focus Fortify On Demand (FOD)_ plugin allows you to execute static and dynamic scans in 
+Fortify on Demand, import on-premise scans from Fortify SCA and Fortify WebInspect, and report on the 
+status of scans and releases. 
 
 This plugin is a work in progress but it is intended to provide the following steps:
 
@@ -20,6 +21,27 @@ This plugin is a work in progress but it is intended to provide the following st
 Download the latest version from the _release_ directory and install into Deployment Automation from the 
 **Administration\Automation\Plugins** page.
 
+### Using the plugin
+
+The plugin can authenticate with Fortify on Demand using either API Client Credentials (recommended) or Username and Password
+details for the tenant. To create new Client Credentials in Fortify on Demand navigate to **Administration\Settings\API** and
+select **Add Key**. Create a new key for an application and select "_Security Lead_" for the role. 
+
+You will also need to create Deployment Automation 
+[System Properties](http://help.serena.com/doc_center/sra/ver6_3/sda_help/sra_adm_sys_properties.html) for the
+plugin steps to use:
+
+ | Property | Example Value | Description |
+ | -------- | ------------- | ----------- |
+ |`fod.username`| user | Your username or API Client Id (API Key) |
+ |`fod.password`| password | Your password or API Client Secret |
+ |`fod.tenant`| tenant001 | The tenant you are using (from login window) - required if not using Client Credentials |
+ |`fod.apiUrl`| https://api.emea.fortify.com | URL to the FOD API for your tenant |
+ |`fod.portalUrl`| https://emea.fortify.com | The URL to the user portal where you login |
+
+Most of the steps also required "_Application Id_" and "_Release Id_" values - it is recommended that these are set as
+[Application Properties](http://help.serena.com/doc_center/sra/ver6_3_1/sda_help/ProcConfAppPropNew.html) in Deployment Automation.
+ 
 ### Building the plugin
 
 To build the plugin you will need to clone the following repositories (at the same level as this repository):
